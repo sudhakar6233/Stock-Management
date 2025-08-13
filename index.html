@@ -154,160 +154,142 @@
 </head>
 <body>
 <header>
-    <h1>Stock Management App</h1>
+<h1>Stock Management App</h1>
 </header>
 <main>
-    <section id="login-section">
-        <h2>Login</h2>
-        <form id="login-form">
-            <label for="username">Username</label>
-            <input type="text" id="username" required />
-            <label for="password">Password</label>
-            <input type="password" id="password" required />
-            <button type="submit">Login</button>
-        </form>
-    </section>
-
-    <section id="app-section" class="hidden">
-        <h2>Add / Edit Product</h2>
-        <form id="product-form">
-            <input type="hidden" id="product-id" />
-            <label for="product-name">Product Name</label>
-            <input type="text" id="product-name" required />
-            <label for="price">Price</label>
-            <input type="number" id="price" min="0" step="0.01" required />
-            <label for="stock">Stock</label>
-            <input type="number" id="stock" min="0" required />
-            <label for="description">Description</label>
-            <textarea id="description"></textarea>
-            <button type="submit">Save</button>
-        </form>
-
-        <div class="dashboard">
-            <div class="card">Total Products: <span id="total-products">0</span></div>
-            <div class="card">Total Units: <span id="total-units">0</span></div>
-            <div class="card">Last Added: <span id="last-added">N/A</span></div>
-        </div>
-
-        <input type="text" id="search" placeholder="Search products..." />
-        <table id="product-table">
-            <thead>
-                <tr>
-                    <th>Product Name</th>
-                    <th>Price</th>
-                    <th>Stock</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </section>
+<section id="login-section">
+<h2>Login</h2>
+<form id="login-form">
+<label for="username">Username</label>
+<input type="text" id="username" required />
+<label for="password">Password</label>
+<input type="password" id="password" required />
+<button type="submit">Login</button>
+</form>
+</section>
+<section id="app-section" class="hidden">
+<h2>Add / Edit Product</h2>
+<form id="product-form">
+<input type="hidden" id="product-id" />
+<label for="product-name">Product Name</label>
+<input type="text" id="product-name" required />
+<label for="price">Price</label>
+<input type="number" id="price" min="0" step="0.01" required />
+<label for="stock">Stock</label>
+<input type="number" id="stock" min="0" required />
+<label for="description">Description</label>
+<textarea id="description"></textarea>
+<button type="submit">Save</button>
+</form>
+<div class="dashboard">
+<div class="card">Total Products: <span id="total-products">0</span></div>
+<div class="card">Total Units: <span id="total-units">0</span></div>
+<div class="card">Last Added: <span id="last-added">N/A</span></div>
+</div>
+<input type="text" id="search" placeholder="Search products..." />
+<table id="product-table">
+<thead>
+<tr>
+<th>Product Name</th>
+<th>Price</th>
+<th>Stock</th>
+<th>Description</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</section>
 </main>
-
 <script>
-    const loginSection = document.getElementById('login-section');
-    const appSection = document.getElementById('app-section');
-    const loginForm = document.getElementById('login-form');
-    const productForm = document.getElementById('product-form');
-    const tableBody = document.querySelector('#product-table tbody');
-    const searchInput = document.getElementById('search');
-    const totalProductsEl = document.getElementById('total-products');
-    const totalUnitsEl = document.getElementById('total-units');
-    const lastAddedEl = document.getElementById('last-added');
-
-    let products = JSON.parse(localStorage.getItem('products') || '[]');
-
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const user = document.getElementById('username').value.trim();
-        const pass = document.getElementById('password').value.trim();
-        if (user === 'admin' && pass === 'admin@123') {
-            loginSection.classList.add('hidden');
-            appSection.classList.remove('hidden');
-            renderProducts();
-        } else {
-            alert('Invalid credentials');
-        }
-    });
-
-    productForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const id = document.getElementById('product-id').value;
-        const name = document.getElementById('product-name').value.trim();
-        const price = parseFloat(document.getElementById('price').value);
-        const stock = parseInt(document.getElementById('stock').value);
-        const desc = document.getElementById('description').value.trim();
-
-        if (!name || price < 0 || stock < 0) {
-            alert('Invalid input');
-            return;
-        }
-
-        if (id) {
-            const index = products.findIndex(p => p.id === id);
-            products[index] = { id, name, price, stock, desc };
-        } else {
-            products.push({ id: Date.now().toString(), name, price, stock, desc });
-        }
-        saveProducts();
-        productForm.reset();
-        renderProducts();
-    });
-
-    function renderProducts(filter = '') {
-        tableBody.innerHTML = '';
-        const filtered = products.filter(p => p.name.toLowerCase().includes(filter) || p.desc.toLowerCase().includes(filter));
-        filtered.forEach(p => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${p.name}</td>
-                <td>${p.price.toFixed(2)}</td>
-                <td>${p.stock}</td>
-                <td>${p.desc}</td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="edit-btn" onclick="editProduct('${p.id}')">Edit</button>
-                        <button class="delete-btn" onclick="deleteProduct('${p.id}')">Delete</button>
-                    </div>
-                </td>
-            `;
-            tableBody.appendChild(row);
-        });
-        updateDashboard();
-    }
-
-    function saveProducts() {
-        localStorage.setItem('products', JSON.stringify(products));
-    }
-
-    function editProduct(id) {
-        const p = products.find(p => p.id === id);
-        document.getElementById('product-id').value = p.id;
-        document.getElementById('product-name').value = p.name;
-        document.getElementById('price').value = p.price;
-        document.getElementById('stock').value = p.stock;
-        document.getElementById('description').value = p.desc;
-    }
-
-    function deleteProduct(id) {
-        if (confirm('Delete this product?')) {
-            products = products.filter(p => p.id !== id);
-            saveProducts();
-            renderProducts();
-        }
-    }
-
-    function updateDashboard() {
-        totalProductsEl.textContent = products.length;
-        totalUnitsEl.textContent = products.reduce((sum, p) => sum + p.stock, 0);
-        lastAddedEl.textContent = products.length ? products[products.length - 1].name : 'N/A';
-    }
-
-    searchInput.addEventListener('input', (e) => {
-        renderProducts(e.target.value.toLowerCase());
-    });
+const loginSection = document.getElementById('login-section');
+const appSection = document.getElementById('app-section');
+const loginForm = document.getElementById('login-form');
+const productForm = document.getElementById('product-form');
+const tableBody = document.querySelector('#product-table tbody');
+const searchInput = document.getElementById('search');
+const totalProductsEl = document.getElementById('total-products');
+const totalUnitsEl = document.getElementById('total-units');
+const lastAddedEl = document.getElementById('last-added');
+let products = JSON.parse(localStorage.getItem('products') || '[]');
+loginForm.addEventListener('submit', (e) => {
+e.preventDefault();
+const user = document.getElementById('username').value.trim();
+const pass = document.getElementById('password').value.trim();
+if (user === 'admin' && pass === 'admin@123') {
+loginSection.classList.add('hidden');
+appSection.classList.remove('hidden');
+renderProducts();
+ } else {
+alert('Invalid credentials');
+}
+});
+productForm.addEventListener('submit', (e) => {
+e.preventDefault();
+const id = document.getElementById('product-id').value;
+const name = document.getElementById('product-name').value.trim();
+const price = parseFloat(document.getElementById('price').value);
+const stock = parseInt(document.getElementById('stock').value);
+desc = document.getElementById('description').value.trim();
+if (!name || price < 0 || stock < 0) {
+alert('Invalid input');
+return;
+}
+if (id) {
+const index = products.findIndex(p => p.id === id);
+products[index] = { id, name, price, stock, desc };
+} else {
+products.push({ id: Date.now().toString(), name, price, stock, desc });
+}
+saveProducts();
+productForm.reset();
+renderProducts();
+});
+function renderProducts(filter = '') {
+tableBody.innerHTML = '';
+const filtered = products.filter(p => p.name.toLowerCase().includes(filter) || p.desc.toLowerCase().includes(filter));
+filtered.forEach(p => {
+const row = document.createElement('tr');
+row.innerHTML = `
+<td>${p.name}</td>
+<td>${p.price.toFixed(2)}</td>
+<td>${p.stock}</td>
+<td>${p.desc}</td>
+<td>
+<div class="action-buttons"> <button class="edit-btn" onclick="editProduct('${p.id}')">Edit</button>
+<button class="delete-btn" onclick="deleteProduct('${p.id}')">Delete</button>
+</div>
+</td>`;
+tableBody.appendChild(row);
+});
+updateDashboard();
+}
+function saveProducts() {
+localStorage.setItem('products', JSON.stringify(products));
+}
+function editProduct(id) {
+const p = products.find(p => p.id === id);
+document.getElementById('product-id').value = p.id;
+document.getElementById('product-name').value = p.name;
+document.getElementById('price').value = p.price;
+document.getElementById('stock').value = p.stock;
+document.getElementById('description').value = p.desc;
+}
+function deleteProduct(id) {
+if (confirm('Delete this product?')) {
+products = products.filter(p => p.id !== id);
+saveProducts();
+renderProducts();
+}
+}
+function updateDashboard() {
+totalProductsEl.textContent = products.length;
+totalUnitsEl.textContent = products.reduce((sum, p) => sum + p.stock, 0);
+lastAddedEl.textContent = products.length ? products[products.length - 1].name : 'N/A';
+}
+searchInput.addEventListener('input', (e) => {
+renderProducts(e.target.value.toLowerCase());
+});
 </script>
 </body>
 </html>
-
